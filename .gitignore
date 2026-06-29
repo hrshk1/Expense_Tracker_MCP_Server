@@ -12,6 +12,7 @@ wheels/
 # Local environment and runtime data
 .env
 .env.*
+.tmp_data/
 *.db
 *.sqlite
 *.sqlite3

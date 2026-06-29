@@ -2,13 +2,38 @@ from fastmcp import FastMCP
 import os
 import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "expenses.db")
+APP_DIR = os.path.dirname(__file__)
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), "categories.json")
 
 mcp = FastMCP("Expense Tracker MCP Server", "1.0.0")
 
+def get_db_path():
+    explicit_path = os.getenv("EXPENSE_DB_PATH")
+    if explicit_path:
+        return os.path.abspath(explicit_path)
+
+    data_dir = os.getenv("EXPENSE_DATA_DIR")
+    if data_dir:
+        return os.path.join(os.path.abspath(data_dir), "expenses.db")
+
+    local_db_path = os.path.join(APP_DIR, "expenses.db")
+    local_db_is_writable = not os.path.exists(local_db_path) or os.access(local_db_path, os.W_OK)
+    if os.access(APP_DIR, os.W_OK) and local_db_is_writable:
+        return local_db_path
+
+    return os.path.join("/tmp", "expense_tracker_mcp_server", "expenses.db")
+
+
+DB_PATH = get_db_path()
+
+
+def connect_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    return sqlite3.connect(DB_PATH)
+
+
 def init_db():
-    with sqlite3.connect(DB_PATH) as c:
+    with connect_db() as c:
         c.execute("""CREATE TABLE IF NOT EXISTS expenses (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         date TEXT NOT NULL,
@@ -24,7 +49,7 @@ init_db()
 @mcp.tool()
 def add_expense(date,amount,category,subcategory='',note=''):
     """Add a new expense to the database."""
-    with sqlite3.connect(DB_PATH) as c:
+    with connect_db() as c:
         curr = c.execute("INSERT INTO expenses (date, amount, category, subcategory, note) VALUES (?, ?, ?, ?, ?)",
                          (date, amount, category, subcategory, note))
         return {"status": "success", "id": curr.lastrowid}
@@ -32,7 +57,7 @@ def add_expense(date,amount,category,subcategory='',note=''):
 @mcp.tool()
 def list_expenses(start_date, end_date):
     '''List expense entries within an inclusive date range.'''
-    with sqlite3.connect(DB_PATH) as c:
+    with connect_db() as c:
         cur = c.execute(
             """
             SELECT id, date, amount, category, subcategory, note
@@ -51,7 +76,7 @@ def list_expenses(start_date, end_date):
 def summarize_expenses_by_category(category):
     """Summarize expenses for a given category."""
 
-    with sqlite3.connect(DB_PATH) as c:
+    with connect_db() as c:
         cur = c.execute(
             """
             SELECT
