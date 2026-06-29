@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local environment and runtime data
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3
+
+# Personal scratch notes
+notes
+notes.txt

@@ -1,0 +1,145 @@
+{
+  "Food": [
+    "Groceries",
+    "Restaurants",
+    "Fast Food",
+    "Cafe",
+    "Snacks",
+    "Beverages",
+    "Food Delivery"
+  ],
+  "Transportation": [
+    "Fuel",
+    "Public Transport",
+    "Taxi",
+    "Ride Sharing",
+    "Parking",
+    "Tolls",
+    "Vehicle Maintenance"
+  ],
+  "Housing": [
+    "Rent",
+    "Electricity",
+    "Water",
+    "Gas",
+    "Internet",
+    "Maintenance",
+    "Furniture",
+    "Home Decor"
+  ],
+  "Shopping": [
+    "Clothing",
+    "Footwear",
+    "Electronics",
+    "Accessories",
+    "Books",
+    "Gifts",
+    "Personal Items"
+  ],
+  "Health": [
+    "Medicines",
+    "Doctor",
+    "Hospital",
+    "Health Insurance",
+    "Medical Tests",
+    "Fitness"
+  ],
+  "Entertainment": [
+    "Movies",
+    "Games",
+    "Music",
+    "Streaming Services",
+    "Events",
+    "Hobbies"
+  ],
+  "Education": [
+    "Tuition",
+    "Books",
+    "Courses",
+    "Stationery",
+    "Exam Fees",
+    "Certifications"
+  ],
+  "Travel": [
+    "Flights",
+    "Hotels",
+    "Train",
+    "Bus",
+    "Sightseeing",
+    "Travel Insurance",
+    "Visa"
+  ],
+  "Bills": [
+    "Mobile Recharge",
+    "Electricity Bill",
+    "Water Bill",
+    "Gas Bill",
+    "Internet Bill",
+    "Credit Card Bill"
+  ],
+  "Personal Care": [
+    "Salon",
+    "Cosmetics",
+    "Skin Care",
+    "Hair Care",
+    "Toiletries"
+  ],
+  "Family": [
+    "Parents",
+    "Children",
+    "Relatives",
+    "Family Events"
+  ],
+  "Investments": [
+    "Stocks",
+    "Mutual Funds",
+    "Fixed Deposit",
+    "Gold",
+    "Cryptocurrency",
+    "Retirement"
+  ],
+  "Insurance": [
+    "Health Insurance",
+    "Life Insurance",
+    "Vehicle Insurance",
+    "Home Insurance"
+  ],
+  "Taxes": [
+    "Income Tax",
+    "Property Tax",
+    "Professional Tax",
+    "Other Taxes"
+  ],
+  "Business": [
+    "Office Supplies",
+    "Software",
+    "Marketing",
+    "Travel",
+    "Equipment"
+  ],
+  "Charity": [
+    "Donations",
+    "Religious Contributions",
+    "Fundraising"
+  ],
+  "Pets": [
+    "Food",
+    "Veterinary",
+    "Accessories",
+    "Grooming"
+  ],
+  "Subscriptions": [
+    "Netflix",
+    "Spotify",
+    "YouTube Premium",
+    "Cloud Storage",
+    "Software Subscription"
+  ],
+  "Miscellaneous": [
+    "Other",
+    "Unexpected Expense",
+    "Emergency",
+    "Fees",
+    "Penalties"
+  ]
+}
