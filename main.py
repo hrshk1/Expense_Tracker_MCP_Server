@@ -1,11 +1,14 @@
 from fastmcp import FastMCP
+import aiofiles
+import aiosqlite
 import os
-import sqlite3
+from contextlib import asynccontextmanager
 
 APP_DIR = os.path.dirname(__file__)
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), "categories.json")
 
 mcp = FastMCP("Expense Tracker MCP Server", "1.0.0")
+
 
 def get_db_path():
     explicit_path = os.getenv("EXPENSE_DB_PATH")
@@ -25,16 +28,22 @@ def get_db_path():
 
 
 DB_PATH = get_db_path()
+DB_INITIALIZED = False
 
 
-def connect_db():
+@asynccontextmanager
+async def connect_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        yield db
 
 
-def init_db():
-    with connect_db() as c:
-        c.execute("""CREATE TABLE IF NOT EXISTS expenses (
+async def init_db():
+    global DB_INITIALIZED
+
+    async with connect_db() as c:
+        await c.execute("""CREATE TABLE IF NOT EXISTS expenses (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         date TEXT NOT NULL,
                         amount REAL NOT NULL,
@@ -42,23 +51,36 @@ def init_db():
                         subcategory TEXT DEFAULT '',
                         note TEXT DEFAULT ''
                     )""")
-        
-init_db()
+        await c.commit()
+    DB_INITIALIZED = True
+
+
+async def ensure_db_initialized():
+    if not DB_INITIALIZED:
+        await init_db()
 
 
 @mcp.tool()
-def add_expense(date,amount,category,subcategory='',note=''):
+async def add_expense(date, amount, category, subcategory='', note=''):
     """Add a new expense to the database."""
-    with connect_db() as c:
-        curr = c.execute("INSERT INTO expenses (date, amount, category, subcategory, note) VALUES (?, ?, ?, ?, ?)",
-                         (date, amount, category, subcategory, note))
+    await ensure_db_initialized()
+
+    async with connect_db() as c:
+        curr = await c.execute(
+            "INSERT INTO expenses (date, amount, category, subcategory, note) VALUES (?, ?, ?, ?, ?)",
+            (date, amount, category, subcategory, note)
+        )
+        await c.commit()
         return {"status": "success", "id": curr.lastrowid}
-    
+
+
 @mcp.tool()
-def list_expenses(start_date, end_date):
+async def list_expenses(start_date, end_date):
     '''List expense entries within an inclusive date range.'''
-    with connect_db() as c:
-        cur = c.execute(
+    await ensure_db_initialized()
+
+    async with connect_db() as c:
+        cur = await c.execute(
             """
             SELECT id, date, amount, category, subcategory, note
             FROM expenses
@@ -68,16 +90,17 @@ def list_expenses(start_date, end_date):
             (start_date, end_date)
         )
 
-        cols = [d[0] for d in cur.description]
-        return [dict(zip(cols, r)) for r in cur.fetchall()]
+        rows = await cur.fetchall()
+        return [dict(row) for row in rows]
 
 
 @mcp.tool()
-def summarize_expenses_by_category(category):
+async def summarize_expenses_by_category(category):
     """Summarize expenses for a given category."""
+    await ensure_db_initialized()
 
-    with connect_db() as c:
-        cur = c.execute(
+    async with connect_db() as c:
+        cur = await c.execute(
             """
             SELECT
                 category,
@@ -93,23 +116,24 @@ def summarize_expenses_by_category(category):
             (category,)
         )
 
-        row = cur.fetchone()
+        row = await cur.fetchone()
 
         if row is None:
             return {
                 "message": f"No expenses found for category '{category}'."
             }
 
-        cols = [d[0] for d in cur.description]
-        return dict(zip(cols, row))
-    
+        return dict(row)
+
+
 @mcp.resource("expense://categories", mime_type="application/json")
-def get_categories():
-    #
-    with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
-        return f.read()
+async def get_categories():
+    async with aiofiles.open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
+        return await f.read()
+
 
 if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(init_db())
     mcp.run(transport="http", host="0.0.0.0", port=8000)
-    
-    
