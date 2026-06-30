@@ -4,10 +4,16 @@ import aiosqlite
 import os
 from contextlib import asynccontextmanager
 
+from auth import create_auth_provider, require_reader, require_writer
+
 APP_DIR = os.path.dirname(__file__)
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), "categories.json")
 
-mcp = FastMCP("Expense Tracker MCP Server", "1.0.0")
+mcp = FastMCP(
+    "Expense Tracker MCP Server",
+    version="1.0.0",
+    auth=create_auth_provider(),
+)
 
 
 def get_db_path():
@@ -60,7 +66,7 @@ async def ensure_db_initialized():
         await init_db()
 
 
-@mcp.tool()
+@mcp.tool(auth=require_writer)
 async def add_expense(date, amount, category, subcategory='', note=''):
     """Add a new expense to the database."""
     await ensure_db_initialized()
@@ -74,7 +80,7 @@ async def add_expense(date, amount, category, subcategory='', note=''):
         return {"status": "success", "id": curr.lastrowid}
 
 
-@mcp.tool()
+@mcp.tool(auth=require_reader)
 async def list_expenses(start_date, end_date):
     '''List expense entries within an inclusive date range.'''
     await ensure_db_initialized()
@@ -94,7 +100,7 @@ async def list_expenses(start_date, end_date):
         return [dict(row) for row in rows]
 
 
-@mcp.tool()
+@mcp.tool(auth=require_reader)
 async def summarize_expenses_by_category(category):
     """Summarize expenses for a given category."""
     await ensure_db_initialized()
