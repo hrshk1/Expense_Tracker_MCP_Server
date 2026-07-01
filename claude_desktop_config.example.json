@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "expense-tracker": {
+      "command": "C:\\Users\\Harsh\\Desktop\\cd\\expense_tracker_mcp_server\\.venv\\Scripts\\python.exe",
+      "args": [
+        "C:\\Users\\Harsh\\Desktop\\cd\\expense_tracker_mcp_server\\main.py"
+      ],
+      "env": {
+        "EXPENSE_DATA_DIR": "C:\\Users\\Harsh\\Desktop\\cd\\expense_tracker_mcp_server\\.tmp_data",
+        "WRITER_EMAILS": "your-name@yulu.bike",
+        "MCP_BASE_URL": "http://localhost:8000"
+      }
+    }
+  }
+}
